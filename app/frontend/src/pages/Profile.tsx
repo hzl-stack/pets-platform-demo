@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { Store, ShoppingBag, User, LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { formatToShanghaiTime } from '@/utils/dateFormatter';
 
 const client = createClient();
 
@@ -34,6 +35,7 @@ export default function Profile() {
   const [userType, setUserType] = useState<'customer' | 'seller'>('customer');
   const [myShop, setMyShop] = useState<Shop | null>(null);
   const [myOrders, setMyOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -45,8 +47,14 @@ export default function Profile() {
     try {
       const response = await client.auth.me();
       setUser(response.data);
-      loadUserData();
+      await loadUserData();
+      setLoading(false);
     } catch (error) {
+      toast({
+        title: '请先登录',
+        description: '您需要登录才能访问个人中心',
+        variant: 'destructive',
+      });
       navigate('/');
     }
   };
@@ -97,6 +105,17 @@ export default function Profile() {
   const switchToSeller = () => {
     navigate('/seller/register');
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">加载中...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return null;
@@ -172,7 +191,7 @@ export default function Profile() {
                           <div>
                             <p className="font-semibold">订单号: {order.id}</p>
                             <p className="text-sm text-gray-600">
-                              下单时间: {order.created_at}
+                              下单时间: {formatToShanghaiTime(order.created_at)}
                             </p>
                           </div>
                           <div className="text-right">

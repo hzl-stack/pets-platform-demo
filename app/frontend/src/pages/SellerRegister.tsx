@@ -1,121 +1,146 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@metagptx/web-sdk';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 import { Store } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { getCurrentShanghaiTime } from '@/utils/dateFormatter';
 
 const client = createClient();
 
 export default function SellerRegister() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [shopName, setShopName] = useState('');
   const [description, setDescription] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-    if (!shopName.trim()) {
+  const checkAuth = async () => {
+    try {
+      const response = await client.auth.me();
+      setUser(response.data);
+      
+      // Check if user already has a shop
+      const shopResponse = await client.entities.shops.query({});
+      if (shopResponse.data.items && shopResponse.data.items.length > 0) {
+        toast({
+          title: '您已经有店铺了',
+          description: '跳转到商家中心',
+        });
+        navigate('/seller');
+        return;
+      }
+      
+      setLoading(false);
+    } catch (error) {
       toast({
-        title: '请输入店铺名称',
+        title: '请先登录',
+        description: '您需要登录才能开店',
+        variant: 'destructive',
+      });
+      navigate('/');
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!shopName || !description) {
+      toast({
+        title: '请填写完整信息',
         variant: 'destructive',
       });
       return;
     }
 
-    setLoading(true);
     try {
       await client.entities.shops.create({
         data: {
           shop_name: shopName,
-          description: description || '暂无描述',
-          logo_url: 'https://mgx-backend-cdn.metadl.com/generate/images/940135/2026-01-30/07fdc374-fdcb-4339-895f-65959cfa2061.png',
+          description,
+          logo_url: '/images/Shop.jpg',
           status: 'active',
-          created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+          created_at: getCurrentShanghaiTime(),
         },
       });
 
       toast({
-        title: '店铺创建成功！',
+        title: '开店成功',
+        description: '欢迎成为商家！',
       });
 
-      navigate('/profile');
+      navigate('/seller');
     } catch (error: any) {
       toast({
-        title: '创建失败',
+        title: '开店失败',
         description: error?.message || '请稍后重试',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">加载中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-2xl">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center text-2xl">
-              <Store className="mr-3 h-6 w-6 text-purple-500" />
-              开设店铺
-            </CardTitle>
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
+                <Store className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-3xl">开设店铺</CardTitle>
+                <p className="text-gray-600 mt-1">填写店铺信息，开启您的销售之旅</p>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <Label htmlFor="shopName">店铺名称 *</Label>
-                <Input
-                  id="shopName"
-                  value={shopName}
-                  onChange={(e) => setShopName(e.target.value)}
-                  placeholder="请输入店铺名称"
-                  className="mt-2"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description">店铺简介</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="介绍一下您的店铺..."
-                  className="mt-2 min-h-[120px]"
-                />
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                  <strong>提示：</strong>创建店铺后，您将可以添加和管理商品。当前为测试版，所有商品价格为0元。
-                </p>
-              </div>
-
-              <div className="flex space-x-4">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-purple-500 hover:bg-purple-600 text-white rounded-full"
-                >
-                  {loading ? '创建中...' : '创建店铺'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/profile')}
-                  className="flex-1 rounded-full"
-                >
-                  取消
-                </Button>
-              </div>
-            </form>
+          <CardContent className="space-y-6">
+            <div>
+              <label className="text-sm font-medium mb-2 block">店铺名称</label>
+              <Input
+                value={shopName}
+                onChange={(e) => setShopName(e.target.value)}
+                placeholder="输入店铺名称"
+                className="text-lg"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">店铺简介</label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="介绍一下您的店铺..."
+                className="min-h-[150px]"
+              />
+            </div>
+            <Button
+              onClick={handleSubmit}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-full py-6 text-lg"
+            >
+              <Store className="mr-2 h-5 w-5" />
+              创建店铺
+            </Button>
           </CardContent>
         </Card>
       </div>

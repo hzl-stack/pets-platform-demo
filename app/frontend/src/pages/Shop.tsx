@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ShoppingCart, Search } from 'lucide-react';
+import { ShoppingCart, Search, LogIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { runMigration } from '@/utils/migration';
 
@@ -108,9 +108,9 @@ export default function Shop() {
     if (!user) {
       toast({
         title: '请先登录',
+        description: '您需要登录才能添加商品到购物车',
         variant: 'destructive',
       });
-      client.auth.toLogin();
       return;
     }
 
@@ -159,6 +159,29 @@ export default function Shop() {
           <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
             宠物商城
           </h1>
+
+          {/* Guest Notice */}
+          {!user && (
+            <Card className="mb-6 bg-gradient-to-r from-pink-50 to-purple-50 border-pink-200">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <LogIn className="h-5 w-5 text-pink-500" />
+                    <p className="text-sm text-gray-700">
+                      您当前以游客身份浏览，登录后可添加商品到购物车
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => client.auth.toLogin()}
+                    size="sm"
+                    className="bg-pink-500 hover:bg-pink-600 text-white rounded-full"
+                  >
+                    登录
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -227,11 +250,11 @@ export default function Shop() {
                 <CardFooter className="p-4 pt-0">
                   <Button
                     onClick={() => addToCart(product.id)}
-                    disabled={product.stock === 0}
+                    disabled={product.stock === 0 || !user}
                     className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-full"
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    {product.stock === 0 ? '已售罄' : '加入购物车'}
+                    {product.stock === 0 ? '已售罄' : !user ? '登录后购买' : '加入购物车'}
                   </Button>
                 </CardFooter>
               </Card>
