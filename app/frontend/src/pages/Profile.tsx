@@ -73,10 +73,18 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       await client.auth.logout();
+      
+      // Clear local state
+      setUser(null);
+      setMyShop(null);
+      setMyOrders([]);
+      
       toast({
         title: '已退出登录',
       });
-      navigate('/');
+      
+      // Force page reload to clear all state
+      window.location.href = '/';
     } catch (error: any) {
       toast({
         title: '退出失败',
@@ -234,7 +242,7 @@ export default function Profile() {
                 <CardContent className="py-16 text-center">
                   <Store className="h-16 w-16 mx-auto mb-4 text-gray-400" />
                   <h3 className="text-xl font-semibold mb-2">还没有店铺？</h3>
-                  <p className="text-gray-600 mb-6">立即开店，开启您的宠物用品销售之旅</p>
+                  <p className="text-gray-600 mb-6">立即开店,开启您的宠物用品销售之旅</p>
                   <Button
                     onClick={switchToSeller}
                     className="bg-purple-500 hover:bg-purple-600 text-white rounded-full px-8"
