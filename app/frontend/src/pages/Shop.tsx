@@ -47,7 +47,7 @@ export default function Shop() {
 
   const loadProducts = async () => {
     try {
-      const response = await client.entities.products.queryAll({
+      const response = await client.entities.products.query({
         query: { status: 'active' },
         sort: '-created_at',
       });

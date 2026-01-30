@@ -16,11 +16,9 @@ class ProductsService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, data: Dict[str, Any], user_id: Optional[str] = None) -> Optional[Products]:
+    async def create(self, data: Dict[str, Any]) -> Optional[Products]:
         """Create a new products"""
         try:
-            if user_id:
-                data['user_id'] = user_id
             obj = Products(**data)
             self.db.add(obj)
             await self.db.commit()
@@ -32,21 +30,10 @@ class ProductsService:
             logger.error(f"Error creating products: {str(e)}")
             raise
 
-    async def check_ownership(self, obj_id: int, user_id: str) -> bool:
-        """Check if user owns this record"""
-        try:
-            obj = await self.get_by_id(obj_id, user_id=user_id)
-            return obj is not None
-        except Exception as e:
-            logger.error(f"Error checking ownership for products {obj_id}: {str(e)}")
-            return False
-
-    async def get_by_id(self, obj_id: int, user_id: Optional[str] = None) -> Optional[Products]:
-        """Get products by ID (user can only see their own records)"""
+    async def get_by_id(self, obj_id: int) -> Optional[Products]:
+        """Get products by ID"""
         try:
             query = select(Products).where(Products.id == obj_id)
-            if user_id:
-                query = query.where(Products.user_id == user_id)
             result = await self.db.execute(query)
             return result.scalar_one_or_none()
         except Exception as e:
@@ -57,18 +44,13 @@ class ProductsService:
         self, 
         skip: int = 0, 
         limit: int = 20, 
-        user_id: Optional[str] = None,
         query_dict: Optional[Dict[str, Any]] = None,
         sort: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Get paginated list of productss (user can only see their own records)"""
+        """Get paginated list of productss"""
         try:
             query = select(Products)
             count_query = select(func.count(Products.id))
-            
-            if user_id:
-                query = query.where(Products.user_id == user_id)
-                count_query = count_query.where(Products.user_id == user_id)
             
             if query_dict:
                 for field, value in query_dict.items():
@@ -103,15 +85,15 @@ class ProductsService:
             logger.error(f"Error fetching products list: {str(e)}")
             raise
 
-    async def update(self, obj_id: int, update_data: Dict[str, Any], user_id: Optional[str] = None) -> Optional[Products]:
-        """Update products (requires ownership)"""
+    async def update(self, obj_id: int, update_data: Dict[str, Any]) -> Optional[Products]:
+        """Update products"""
         try:
-            obj = await self.get_by_id(obj_id, user_id=user_id)
+            obj = await self.get_by_id(obj_id)
             if not obj:
                 logger.warning(f"Products {obj_id} not found for update")
                 return None
             for key, value in update_data.items():
-                if hasattr(obj, key) and key != 'user_id':
+                if hasattr(obj, key):
                     setattr(obj, key, value)
 
             await self.db.commit()
@@ -123,10 +105,10 @@ class ProductsService:
             logger.error(f"Error updating products {obj_id}: {str(e)}")
             raise
 
-    async def delete(self, obj_id: int, user_id: Optional[str] = None) -> bool:
-        """Delete products (requires ownership)"""
+    async def delete(self, obj_id: int) -> bool:
+        """Delete products"""
         try:
-            obj = await self.get_by_id(obj_id, user_id=user_id)
+            obj = await self.get_by_id(obj_id)
             if not obj:
                 logger.warning(f"Products {obj_id} not found for deletion")
                 return False

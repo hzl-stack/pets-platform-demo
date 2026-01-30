@@ -31,7 +31,6 @@ interface CartItemWithProduct extends CartItem {
 export default function Cart() {
   const [user, setUser] = useState<any>(null);
   const [cartItems, setCartItems] = useState<CartItemWithProduct[]>([]);
-  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 

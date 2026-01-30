@@ -9,8 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from services.products import ProductsService
-from dependencies.auth import get_current_user
-from schemas.auth import UserResponse
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -99,10 +97,9 @@ async def query_productss(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
     fields: str = Query(None, description="Comma-separated list of fields to return"),
-    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Query productss with filtering, sorting, and pagination (user can only see their own records)"""
+    """Query productss with filtering, sorting, and pagination"""
     logger.debug(f"Querying productss: query={query}, sort={sort}, skip={skip}, limit={limit}, fields={fields}")
     
     service = ProductsService(db)
@@ -120,7 +117,6 @@ async def query_productss(
             limit=limit,
             query_dict=query_dict,
             sort=sort,
-            user_id=str(current_user.id),
         )
         logger.debug(f"Found {result['total']} productss")
         return result
@@ -172,15 +168,14 @@ async def query_productss_all(
 async def get_products(
     id: int,
     fields: str = Query(None, description="Comma-separated list of fields to return"),
-    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get a single products by ID (user can only see their own records)"""
+    """Get a single products by ID"""
     logger.debug(f"Fetching products with id: {id}, fields={fields}")
     
     service = ProductsService(db)
     try:
-        result = await service.get_by_id(id, user_id=str(current_user.id))
+        result = await service.get_by_id(id)
         if not result:
             logger.warning(f"Products with id {id} not found")
             raise HTTPException(status_code=404, detail="Products not found")
@@ -196,7 +191,6 @@ async def get_products(
 @router.post("", response_model=ProductsResponse, status_code=201)
 async def create_products(
     data: ProductsData,
-    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Create a new products"""
@@ -204,7 +198,7 @@ async def create_products(
     
     service = ProductsService(db)
     try:
-        result = await service.create(data.model_dump(), user_id=str(current_user.id))
+        result = await service.create(data.model_dump())
         if not result:
             raise HTTPException(status_code=400, detail="Failed to create products")
         
@@ -221,7 +215,6 @@ async def create_products(
 @router.post("/batch", response_model=List[ProductsResponse], status_code=201)
 async def create_productss_batch(
     request: ProductsBatchCreateRequest,
-    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Create multiple productss in a single request"""
@@ -232,7 +225,7 @@ async def create_productss_batch(
     
     try:
         for item_data in request.items:
-            result = await service.create(item_data.model_dump(), user_id=str(current_user.id))
+            result = await service.create(item_data.model_dump())
             if result:
                 results.append(result)
         
@@ -247,10 +240,9 @@ async def create_productss_batch(
 @router.put("/batch", response_model=List[ProductsResponse])
 async def update_productss_batch(
     request: ProductsBatchUpdateRequest,
-    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Update multiple productss in a single request (requires ownership)"""
+    """Update multiple productss in a single request"""
     logger.debug(f"Batch updating {len(request.items)} productss")
     
     service = ProductsService(db)
@@ -260,7 +252,7 @@ async def update_productss_batch(
         for item in request.items:
             # Only include non-None values for partial updates
             update_dict = {k: v for k, v in item.updates.model_dump().items() if v is not None}
-            result = await service.update(item.id, update_dict, user_id=str(current_user.id))
+            result = await service.update(item.id, update_dict)
             if result:
                 results.append(result)
         
@@ -276,17 +268,16 @@ async def update_productss_batch(
 async def update_products(
     id: int,
     data: ProductsUpdateData,
-    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Update an existing products (requires ownership)"""
+    """Update an existing products"""
     logger.debug(f"Updating products {id} with data: {data}")
 
     service = ProductsService(db)
     try:
         # Only include non-None values for partial updates
         update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
-        result = await service.update(id, update_dict, user_id=str(current_user.id))
+        result = await service.update(id, update_dict)
         if not result:
             logger.warning(f"Products with id {id} not found for update")
             raise HTTPException(status_code=404, detail="Products not found")
@@ -306,10 +297,9 @@ async def update_products(
 @router.delete("/batch")
 async def delete_productss_batch(
     request: ProductsBatchDeleteRequest,
-    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Delete multiple productss by their IDs (requires ownership)"""
+    """Delete multiple productss by their IDs"""
     logger.debug(f"Batch deleting {len(request.ids)} productss")
     
     service = ProductsService(db)
@@ -317,7 +307,7 @@ async def delete_productss_batch(
     
     try:
         for item_id in request.ids:
-            success = await service.delete(item_id, user_id=str(current_user.id))
+            success = await service.delete(item_id)
             if success:
                 deleted_count += 1
         
@@ -332,15 +322,14 @@ async def delete_productss_batch(
 @router.delete("/{id}")
 async def delete_products(
     id: int,
-    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Delete a single products by ID (requires ownership)"""
+    """Delete a single products by ID"""
     logger.debug(f"Deleting products with id: {id}")
     
     service = ProductsService(db)
     try:
-        success = await service.delete(id, user_id=str(current_user.id))
+        success = await service.delete(id)
         if not success:
             logger.warning(f"Products with id {id} not found for deletion")
             raise HTTPException(status_code=404, detail="Products not found")
