@@ -1,0 +1,38 @@
+{
+    "title": "orders",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "主键，自增"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "用户ID"
+        },
+        "shop_id": {
+            "type": "integer",
+            "description": "店铺ID"
+        },
+        "total_amount": {
+            "type": "number",
+            "description": "订单总额"
+        },
+        "status": {
+            "type": "string",
+            "description": "状态：pending/paid/completed/cancelled"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "创建时间"
+        }
+    },
+    "required": [
+        "id",
+        "user_id",
+        "shop_id",
+        "total_amount",
+        "status",
+        "created_at"
+    ]
+}

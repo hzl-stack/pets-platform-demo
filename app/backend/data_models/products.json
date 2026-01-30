@@ -6,9 +6,9 @@
             "type": "integer",
             "description": "主键，自增"
         },
-        "seller_id": {
-            "type": "string",
-            "description": "商家用户ID"
+        "shop_id": {
+            "type": "integer",
+            "description": "店铺ID"
         },
         "name": {
             "type": "string",
@@ -45,7 +45,7 @@
     },
     "required": [
         "id",
-        "seller_id",
+        "shop_id",
         "name",
         "price",
         "category",

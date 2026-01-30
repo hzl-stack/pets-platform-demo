@@ -1,9 +1,9 @@
 [
     {
-        "seller_id": "seller_001",
+        "shop_id": 1,
         "name": "皇家狗粮成犬粮10kg",
         "description": "适合成年犬的营养均衡狗粮，含优质蛋白质",
-        "price": 299.0,
+        "price": 0.0,
         "category": "食品",
         "image_url": "https://mgx-backend-cdn.metadl.com/generate/images/940135/2026-01-30/772b1972-4869-4caa-9ba3-fea5873bf463.png",
         "stock": 50,
@@ -11,10 +11,10 @@
         "created_at": "2026-01-25 10:00:00"
     },
     {
-        "seller_id": "seller_001",
+        "shop_id": 2,
         "name": "猫咪逗猫棒套装",
         "description": "5件套逗猫玩具，羽毛铃铛多样化设计",
-        "price": 39.9,
+        "price": 0.0,
         "category": "玩具",
         "image_url": "https://mgx-backend-cdn.metadl.com/generate/images/940135/2026-01-30/772b1972-4869-4caa-9ba3-fea5873bf463.png",
         "stock": 100,
@@ -22,10 +22,10 @@
         "created_at": "2026-01-26 11:30:00"
     },
     {
-        "seller_id": "seller_002",
+        "shop_id": 1,
         "name": "宠物自动饮水机",
         "description": "2L大容量，循环过滤，静音设计",
-        "price": 89.0,
+        "price": 0.0,
         "category": "用品",
         "image_url": "https://mgx-backend-cdn.metadl.com/generate/images/940135/2026-01-30/772b1972-4869-4caa-9ba3-fea5873bf463.png",
         "stock": 30,
@@ -33,10 +33,10 @@
         "created_at": "2026-01-27 14:20:00"
     },
     {
-        "seller_id": "seller_002",
+        "shop_id": 2,
         "name": "宠物益生菌粉",
         "description": "调理肠胃，增强免疫力，30袋装",
-        "price": 128.0,
+        "price": 0.0,
         "category": "医疗",
         "image_url": "https://mgx-backend-cdn.metadl.com/generate/images/940135/2026-01-30/772b1972-4869-4caa-9ba3-fea5873bf463.png",
         "stock": 45,
@@ -44,10 +44,10 @@
         "created_at": "2026-01-28 09:00:00"
     },
     {
-        "seller_id": "seller_001",
+        "shop_id": 1,
         "name": "猫砂盆全封闭式",
         "description": "大号猫砂盆，防外溅设计，易清洁",
-        "price": 159.0,
+        "price": 0.0,
         "category": "用品",
         "image_url": "https://mgx-backend-cdn.metadl.com/generate/images/940135/2026-01-30/772b1972-4869-4caa-9ba3-fea5873bf463.png",
         "stock": 20,
@@ -55,10 +55,10 @@
         "created_at": "2026-01-29 15:30:00"
     },
     {
-        "seller_id": "seller_002",
+        "shop_id": 2,
         "name": "狗狗磨牙棒",
         "description": "牛肉味磨牙棒，清洁牙齿，10支装",
-        "price": 45.0,
+        "price": 0.0,
         "category": "食品",
         "image_url": "https://mgx-backend-cdn.metadl.com/generate/images/940135/2026-01-30/772b1972-4869-4caa-9ba3-fea5873bf463.png",
         "stock": 80,

@@ -1,0 +1,38 @@
+{
+    "title": "order_items",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "主键，自增"
+        },
+        "order_id": {
+            "type": "integer",
+            "description": "订单ID"
+        },
+        "product_id": {
+            "type": "integer",
+            "description": "商品ID"
+        },
+        "quantity": {
+            "type": "integer",
+            "description": "数量"
+        },
+        "price": {
+            "type": "number",
+            "description": "商品单价"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "创建时间"
+        }
+    },
+    "required": [
+        "id",
+        "order_id",
+        "product_id",
+        "quantity",
+        "price",
+        "created_at"
+    ]
+}

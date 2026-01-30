@@ -1,0 +1,41 @@
+{
+    "title": "shops",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "主键，自增"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "店主用户ID"
+        },
+        "shop_name": {
+            "type": "string",
+            "description": "店铺名称"
+        },
+        "description": {
+            "type": "string",
+            "description": "店铺描述"
+        },
+        "logo_url": {
+            "type": "string",
+            "description": "店铺logo"
+        },
+        "status": {
+            "type": "string",
+            "description": "状态：active/inactive"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "创建时间"
+        }
+    },
+    "required": [
+        "id",
+        "user_id",
+        "shop_name",
+        "status",
+        "created_at"
+    ]
+}

@@ -31,6 +31,7 @@ interface CartItemWithProduct extends CartItem {
 export default function Cart() {
   const [user, setUser] = useState<any>(null);
   const [cartItems, setCartItems] = useState<CartItemWithProduct[]>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -53,7 +54,6 @@ export default function Cart() {
       const cartResponse = await client.entities.cart_items.query({});
       const items = cartResponse.data.items || [];
 
-      // Load product details for each cart item
       const itemsWithProducts = await Promise.all(
         items.map(async (item: CartItem) => {
           try {
@@ -111,6 +111,66 @@ export default function Cart() {
     return cartItems.reduce((total, item) => {
       return total + (item.product?.price || 0) * item.quantity;
     }, 0);
+  };
+
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: '购物车是空的',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Create order (simplified: using shop_id = 1 for test)
+      const orderResponse = await client.entities.orders.create({
+        data: {
+          shop_id: 1,
+          total_amount: calculateTotal(),
+          status: 'completed', // Test version: directly mark as completed
+          created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        },
+      });
+
+      const orderId = orderResponse.data.id;
+
+      // Create order items
+      for (const item of cartItems) {
+        if (item.product) {
+          await client.entities.order_items.create({
+            data: {
+              order_id: orderId,
+              product_id: item.product_id,
+              quantity: item.quantity,
+              price: item.product.price,
+              created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            },
+          });
+        }
+      }
+
+      // Clear cart
+      for (const item of cartItems) {
+        await client.entities.cart_items.delete({ id: item.id.toString() });
+      }
+
+      toast({
+        title: '订单创建成功！',
+        description: '测试版订单已自动完成',
+      });
+
+      navigate('/profile');
+    } catch (error: any) {
+      toast({
+        title: '结算失败',
+        description: error?.message || '请稍后重试',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!user) {
@@ -198,10 +258,15 @@ export default function Cart() {
               <span>总计:</span>
               <span className="text-pink-500">¥{calculateTotal().toFixed(2)}</span>
             </div>
+            <p className="text-sm text-gray-600 mt-2">测试版：所有商品0元</p>
           </CardContent>
           <CardFooter>
-            <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white rounded-full py-6 text-lg">
-              去结算
+            <Button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="w-full bg-pink-500 hover:bg-pink-600 text-white rounded-full py-6 text-lg"
+            >
+              {loading ? '处理中...' : '立即结算'}
             </Button>
           </CardFooter>
         </Card>

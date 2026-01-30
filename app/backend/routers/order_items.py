@@ -8,90 +8,78 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from services.products import ProductsService
+from services.order_items import Order_itemsService
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/entities/products", tags=["products"])
+router = APIRouter(prefix="/api/v1/entities/order_items", tags=["order_items"])
 
 
 # ---------- Pydantic Schemas ----------
-class ProductsData(BaseModel):
+class Order_itemsData(BaseModel):
     """Entity data schema (for create/update)"""
-    shop_id: int
-    name: str
-    description: str = None
+    order_id: int
+    product_id: int
+    quantity: int
     price: float
-    category: str
-    image_url: str = None
-    stock: int = None
-    status: str
     created_at: str
 
 
-class ProductsUpdateData(BaseModel):
+class Order_itemsUpdateData(BaseModel):
     """Update entity data (partial updates allowed)"""
-    shop_id: Optional[int] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
+    order_id: Optional[int] = None
+    product_id: Optional[int] = None
+    quantity: Optional[int] = None
     price: Optional[float] = None
-    category: Optional[str] = None
-    image_url: Optional[str] = None
-    stock: Optional[int] = None
-    status: Optional[str] = None
     created_at: Optional[str] = None
 
 
-class ProductsResponse(BaseModel):
+class Order_itemsResponse(BaseModel):
     """Entity response schema"""
     id: int
-    shop_id: int
-    name: str
-    description: Optional[str] = None
+    order_id: int
+    product_id: int
+    quantity: int
     price: float
-    category: str
-    image_url: Optional[str] = None
-    stock: Optional[int] = None
-    status: str
     created_at: str
 
     class Config:
         from_attributes = True
 
 
-class ProductsListResponse(BaseModel):
+class Order_itemsListResponse(BaseModel):
     """List response schema"""
-    items: List[ProductsResponse]
+    items: List[Order_itemsResponse]
     total: int
     skip: int
     limit: int
 
 
-class ProductsBatchCreateRequest(BaseModel):
+class Order_itemsBatchCreateRequest(BaseModel):
     """Batch create request"""
-    items: List[ProductsData]
+    items: List[Order_itemsData]
 
 
-class ProductsBatchUpdateItem(BaseModel):
+class Order_itemsBatchUpdateItem(BaseModel):
     """Batch update item"""
     id: int
-    updates: ProductsUpdateData
+    updates: Order_itemsUpdateData
 
 
-class ProductsBatchUpdateRequest(BaseModel):
+class Order_itemsBatchUpdateRequest(BaseModel):
     """Batch update request"""
-    items: List[ProductsBatchUpdateItem]
+    items: List[Order_itemsBatchUpdateItem]
 
 
-class ProductsBatchDeleteRequest(BaseModel):
+class Order_itemsBatchDeleteRequest(BaseModel):
     """Batch delete request"""
     ids: List[int]
 
 
 # ---------- Routes ----------
-@router.get("", response_model=ProductsListResponse)
-async def query_productss(
+@router.get("", response_model=Order_itemsListResponse)
+async def query_order_itemss(
     query: str = Query(None, description="Query conditions (JSON string)"),
     sort: str = Query(None, description="Sort field (prefix with '-' for descending)"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -99,10 +87,10 @@ async def query_productss(
     fields: str = Query(None, description="Comma-separated list of fields to return"),
     db: AsyncSession = Depends(get_db),
 ):
-    """Query productss with filtering, sorting, and pagination"""
-    logger.debug(f"Querying productss: query={query}, sort={sort}, skip={skip}, limit={limit}, fields={fields}")
+    """Query order_itemss with filtering, sorting, and pagination"""
+    logger.debug(f"Querying order_itemss: query={query}, sort={sort}, skip={skip}, limit={limit}, fields={fields}")
     
-    service = ProductsService(db)
+    service = Order_itemsService(db)
     try:
         # Parse query JSON if provided
         query_dict = None
@@ -118,17 +106,17 @@ async def query_productss(
             query_dict=query_dict,
             sort=sort,
         )
-        logger.debug(f"Found {result['total']} productss")
+        logger.debug(f"Found {result['total']} order_itemss")
         return result
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error querying productss: {str(e)}", exc_info=True)
+        logger.error(f"Error querying order_itemss: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@router.get("/all", response_model=ProductsListResponse)
-async def query_productss_all(
+@router.get("/all", response_model=Order_itemsListResponse)
+async def query_order_itemss_all(
     query: str = Query(None, description="Query conditions (JSON string)"),
     sort: str = Query(None, description="Sort field (prefix with '-' for descending)"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -136,10 +124,10 @@ async def query_productss_all(
     fields: str = Query(None, description="Comma-separated list of fields to return"),
     db: AsyncSession = Depends(get_db),
 ):
-    # Query productss with filtering, sorting, and pagination without user limitation
-    logger.debug(f"Querying productss: query={query}, sort={sort}, skip={skip}, limit={limit}, fields={fields}")
+    # Query order_itemss with filtering, sorting, and pagination without user limitation
+    logger.debug(f"Querying order_itemss: query={query}, sort={sort}, skip={skip}, limit={limit}, fields={fields}")
 
-    service = ProductsService(db)
+    service = Order_itemsService(db)
     try:
         # Parse query JSON if provided
         query_dict = None
@@ -155,72 +143,72 @@ async def query_productss_all(
             query_dict=query_dict,
             sort=sort
         )
-        logger.debug(f"Found {result['total']} productss")
+        logger.debug(f"Found {result['total']} order_itemss")
         return result
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error querying productss: {str(e)}", exc_info=True)
+        logger.error(f"Error querying order_itemss: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@router.get("/{id}", response_model=ProductsResponse)
-async def get_products(
+@router.get("/{id}", response_model=Order_itemsResponse)
+async def get_order_items(
     id: int,
     fields: str = Query(None, description="Comma-separated list of fields to return"),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get a single products by ID"""
-    logger.debug(f"Fetching products with id: {id}, fields={fields}")
+    """Get a single order_items by ID"""
+    logger.debug(f"Fetching order_items with id: {id}, fields={fields}")
     
-    service = ProductsService(db)
+    service = Order_itemsService(db)
     try:
         result = await service.get_by_id(id)
         if not result:
-            logger.warning(f"Products with id {id} not found")
-            raise HTTPException(status_code=404, detail="Products not found")
+            logger.warning(f"Order_items with id {id} not found")
+            raise HTTPException(status_code=404, detail="Order_items not found")
         
         return result
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error fetching products {id}: {str(e)}", exc_info=True)
+        logger.error(f"Error fetching order_items {id}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@router.post("", response_model=ProductsResponse, status_code=201)
-async def create_products(
-    data: ProductsData,
+@router.post("", response_model=Order_itemsResponse, status_code=201)
+async def create_order_items(
+    data: Order_itemsData,
     db: AsyncSession = Depends(get_db),
 ):
-    """Create a new products"""
-    logger.debug(f"Creating new products with data: {data}")
+    """Create a new order_items"""
+    logger.debug(f"Creating new order_items with data: {data}")
     
-    service = ProductsService(db)
+    service = Order_itemsService(db)
     try:
         result = await service.create(data.model_dump())
         if not result:
-            raise HTTPException(status_code=400, detail="Failed to create products")
+            raise HTTPException(status_code=400, detail="Failed to create order_items")
         
-        logger.info(f"Products created successfully with id: {result.id}")
+        logger.info(f"Order_items created successfully with id: {result.id}")
         return result
     except ValueError as e:
-        logger.error(f"Validation error creating products: {str(e)}")
+        logger.error(f"Validation error creating order_items: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Error creating products: {str(e)}", exc_info=True)
+        logger.error(f"Error creating order_items: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@router.post("/batch", response_model=List[ProductsResponse], status_code=201)
-async def create_productss_batch(
-    request: ProductsBatchCreateRequest,
+@router.post("/batch", response_model=List[Order_itemsResponse], status_code=201)
+async def create_order_itemss_batch(
+    request: Order_itemsBatchCreateRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    """Create multiple productss in a single request"""
-    logger.debug(f"Batch creating {len(request.items)} productss")
+    """Create multiple order_itemss in a single request"""
+    logger.debug(f"Batch creating {len(request.items)} order_itemss")
     
-    service = ProductsService(db)
+    service = Order_itemsService(db)
     results = []
     
     try:
@@ -229,7 +217,7 @@ async def create_productss_batch(
             if result:
                 results.append(result)
         
-        logger.info(f"Batch created {len(results)} productss successfully")
+        logger.info(f"Batch created {len(results)} order_itemss successfully")
         return results
     except Exception as e:
         await db.rollback()
@@ -237,15 +225,15 @@ async def create_productss_batch(
         raise HTTPException(status_code=500, detail=f"Batch create failed: {str(e)}")
 
 
-@router.put("/batch", response_model=List[ProductsResponse])
-async def update_productss_batch(
-    request: ProductsBatchUpdateRequest,
+@router.put("/batch", response_model=List[Order_itemsResponse])
+async def update_order_itemss_batch(
+    request: Order_itemsBatchUpdateRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    """Update multiple productss in a single request"""
-    logger.debug(f"Batch updating {len(request.items)} productss")
+    """Update multiple order_itemss in a single request"""
+    logger.debug(f"Batch updating {len(request.items)} order_itemss")
     
-    service = ProductsService(db)
+    service = Order_itemsService(db)
     results = []
     
     try:
@@ -256,7 +244,7 @@ async def update_productss_batch(
             if result:
                 results.append(result)
         
-        logger.info(f"Batch updated {len(results)} productss successfully")
+        logger.info(f"Batch updated {len(results)} order_itemss successfully")
         return results
     except Exception as e:
         await db.rollback()
@@ -264,45 +252,45 @@ async def update_productss_batch(
         raise HTTPException(status_code=500, detail=f"Batch update failed: {str(e)}")
 
 
-@router.put("/{id}", response_model=ProductsResponse)
-async def update_products(
+@router.put("/{id}", response_model=Order_itemsResponse)
+async def update_order_items(
     id: int,
-    data: ProductsUpdateData,
+    data: Order_itemsUpdateData,
     db: AsyncSession = Depends(get_db),
 ):
-    """Update an existing products"""
-    logger.debug(f"Updating products {id} with data: {data}")
+    """Update an existing order_items"""
+    logger.debug(f"Updating order_items {id} with data: {data}")
 
-    service = ProductsService(db)
+    service = Order_itemsService(db)
     try:
         # Only include non-None values for partial updates
         update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
         result = await service.update(id, update_dict)
         if not result:
-            logger.warning(f"Products with id {id} not found for update")
-            raise HTTPException(status_code=404, detail="Products not found")
+            logger.warning(f"Order_items with id {id} not found for update")
+            raise HTTPException(status_code=404, detail="Order_items not found")
         
-        logger.info(f"Products {id} updated successfully")
+        logger.info(f"Order_items {id} updated successfully")
         return result
     except HTTPException:
         raise
     except ValueError as e:
-        logger.error(f"Validation error updating products {id}: {str(e)}")
+        logger.error(f"Validation error updating order_items {id}: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Error updating products {id}: {str(e)}", exc_info=True)
+        logger.error(f"Error updating order_items {id}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @router.delete("/batch")
-async def delete_productss_batch(
-    request: ProductsBatchDeleteRequest,
+async def delete_order_itemss_batch(
+    request: Order_itemsBatchDeleteRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    """Delete multiple productss by their IDs"""
-    logger.debug(f"Batch deleting {len(request.ids)} productss")
+    """Delete multiple order_itemss by their IDs"""
+    logger.debug(f"Batch deleting {len(request.ids)} order_itemss")
     
-    service = ProductsService(db)
+    service = Order_itemsService(db)
     deleted_count = 0
     
     try:
@@ -311,8 +299,8 @@ async def delete_productss_batch(
             if success:
                 deleted_count += 1
         
-        logger.info(f"Batch deleted {deleted_count} productss successfully")
-        return {"message": f"Successfully deleted {deleted_count} productss", "deleted_count": deleted_count}
+        logger.info(f"Batch deleted {deleted_count} order_itemss successfully")
+        return {"message": f"Successfully deleted {deleted_count} order_itemss", "deleted_count": deleted_count}
     except Exception as e:
         await db.rollback()
         logger.error(f"Error in batch delete: {str(e)}", exc_info=True)
@@ -320,24 +308,24 @@ async def delete_productss_batch(
 
 
 @router.delete("/{id}")
-async def delete_products(
+async def delete_order_items(
     id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    """Delete a single products by ID"""
-    logger.debug(f"Deleting products with id: {id}")
+    """Delete a single order_items by ID"""
+    logger.debug(f"Deleting order_items with id: {id}")
     
-    service = ProductsService(db)
+    service = Order_itemsService(db)
     try:
         success = await service.delete(id)
         if not success:
-            logger.warning(f"Products with id {id} not found for deletion")
-            raise HTTPException(status_code=404, detail="Products not found")
+            logger.warning(f"Order_items with id {id} not found for deletion")
+            raise HTTPException(status_code=404, detail="Order_items not found")
         
-        logger.info(f"Products {id} deleted successfully")
-        return {"message": "Products deleted successfully", "id": id}
+        logger.info(f"Order_items {id} deleted successfully")
+        return {"message": "Order_items deleted successfully", "id": id}
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error deleting products {id}: {str(e)}", exc_info=True)
+        logger.error(f"Error deleting order_items {id}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

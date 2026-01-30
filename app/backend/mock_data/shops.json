@@ -1,0 +1,18 @@
+[
+    {
+        "user_id": "test_seller_001",
+        "shop_name": "萌宠天堂",
+        "description": "专注高品质宠物食品和用品",
+        "logo_url": "https://mgx-backend-cdn.metadl.com/generate/images/940135/2026-01-30/07fdc374-fdcb-4339-895f-65959cfa2061.png",
+        "status": "active",
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "user_id": "test_seller_002",
+        "shop_name": "宠物乐园",
+        "description": "宠物玩具和医疗用品专家",
+        "logo_url": "https://mgx-backend-cdn.metadl.com/generate/images/940135/2026-01-30/07fdc374-fdcb-4339-895f-65959cfa2061.png",
+        "status": "active",
+        "created_at": "2026-01-22 14:30:00"
+    }
+]
