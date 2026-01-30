@@ -10,6 +10,8 @@ import Seller from './pages/Seller';
 import Profile from './pages/Profile';
 import ProfileV2 from './pages/ProfileV2';
 import SellerRegister from './pages/SellerRegister';
+import SellerRegisterV2 from './pages/SellerRegisterV2';
+import InspectorDashboard from './pages/InspectorDashboard';
 import AuthCallback from './pages/AuthCallback';
 
 function App() {
@@ -32,7 +34,9 @@ function App() {
                   <Route path="/seller" element={<Seller />} />
                   <Route path="/profile" element={<ProfileV2 />} />
                   <Route path="/profile-old" element={<Profile />} />
-                  <Route path="/seller/register" element={<SellerRegister />} />
+                  <Route path="/seller/register" element={<SellerRegisterV2 />} />
+                  <Route path="/seller/register-old" element={<SellerRegister />} />
+                  <Route path="/inspector" element={<InspectorDashboard />} />
                 </Routes>
               </>
             }
