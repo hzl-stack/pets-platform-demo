@@ -1,0 +1,45 @@
+{
+    "title": "review_tasks",
+    "type": "object",
+    "description": "Review tasks for inspectors",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "task_type": {
+            "type": "string",
+            "description": "Type of review task",
+            "enum": [
+                "post",
+                "shop"
+            ]
+        },
+        "target_id": {
+            "type": "integer",
+            "description": "ID of post or shop to review"
+        },
+        "assigned_to": {
+            "type": "string",
+            "description": "Inspector user ID assigned to this task"
+        },
+        "status": {
+            "type": "string",
+            "description": "Task status",
+            "enum": [
+                "pending",
+                "completed"
+            ],
+            "default": "pending"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "Task creation timestamp"
+        }
+    },
+    "required": [
+        "id",
+        "task_type",
+        "target_id"
+    ]
+}

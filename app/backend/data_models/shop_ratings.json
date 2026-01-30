@@ -1,0 +1,37 @@
+{
+    "title": "shop_ratings",
+    "type": "object",
+    "description": "Shop ratings and reviews",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "shop_id": {
+            "type": "integer",
+            "description": "Shop being rated"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "User who rated"
+        },
+        "rating": {
+            "type": "integer",
+            "description": "Rating 1-5 stars"
+        },
+        "comment": {
+            "type": "string",
+            "description": "Review comment"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "Rating timestamp"
+        }
+    },
+    "required": [
+        "id",
+        "shop_id",
+        "user_id",
+        "rating"
+    ]
+}

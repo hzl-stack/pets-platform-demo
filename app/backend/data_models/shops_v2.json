@@ -1,0 +1,53 @@
+{
+    "title": "shops_v2",
+    "type": "object",
+    "description": "Shops with review status",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "Shop owner user ID"
+        },
+        "shop_name": {
+            "type": "string",
+            "description": "Shop name"
+        },
+        "description": {
+            "type": "string",
+            "description": "Shop description"
+        },
+        "logo_url": {
+            "type": "string",
+            "description": "Shop logo URL"
+        },
+        "status": {
+            "type": "string",
+            "description": "Shop status",
+            "enum": [
+                "pending",
+                "approved",
+                "rejected",
+                "active",
+                "inactive"
+            ],
+            "default": "pending"
+        },
+        "average_rating": {
+            "type": "number",
+            "description": "Average shop rating",
+            "default": 0
+        },
+        "created_at": {
+            "type": "string",
+            "description": "Creation timestamp"
+        }
+    },
+    "required": [
+        "id",
+        "user_id",
+        "shop_name"
+    ]
+}

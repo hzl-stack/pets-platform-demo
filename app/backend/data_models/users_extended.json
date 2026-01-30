@@ -1,0 +1,46 @@
+{
+    "title": "users_extended",
+    "type": "object",
+    "description": "Extended user profile with experience, level, points, and avatar",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "User ID from auth system"
+        },
+        "username": {
+            "type": "string",
+            "description": "Display name"
+        },
+        "avatar_url": {
+            "type": "string",
+            "description": "Avatar image URL"
+        },
+        "experience": {
+            "type": "integer",
+            "description": "Total experience points",
+            "default": 0
+        },
+        "level": {
+            "type": "integer",
+            "description": "User level (calculated from experience)",
+            "default": 1
+        },
+        "points": {
+            "type": "integer",
+            "description": "Reward points",
+            "default": 0
+        },
+        "created_at": {
+            "type": "string",
+            "description": "Creation timestamp"
+        }
+    },
+    "required": [
+        "id",
+        "user_id"
+    ]
+}

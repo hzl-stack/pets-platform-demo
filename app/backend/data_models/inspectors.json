@@ -1,0 +1,27 @@
+{
+    "title": "inspectors",
+    "type": "object",
+    "description": "Pet Inspector Team members",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "Inspector user ID"
+        },
+        "appointed_at": {
+            "type": "string",
+            "description": "Appointment timestamp"
+        },
+        "appointed_by": {
+            "type": "string",
+            "description": "Who appointed this inspector"
+        }
+    },
+    "required": [
+        "id",
+        "user_id"
+    ]
+}

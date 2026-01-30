@@ -1,0 +1,41 @@
+{
+    "title": "post_reviews",
+    "type": "object",
+    "description": "Reviews for help posts",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "post_id": {
+            "type": "integer",
+            "description": "Post being reviewed"
+        },
+        "reviewer_id": {
+            "type": "string",
+            "description": "Inspector user ID"
+        },
+        "status": {
+            "type": "string",
+            "description": "Review decision",
+            "enum": [
+                "approved",
+                "rejected"
+            ]
+        },
+        "review_comment": {
+            "type": "string",
+            "description": "Review feedback"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "Review timestamp"
+        }
+    },
+    "required": [
+        "id",
+        "post_id",
+        "reviewer_id",
+        "status"
+    ]
+}

@@ -1,0 +1,358 @@
+import json
+import logging
+from typing import List, Optional
+
+
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.database import get_db
+from services.posts_v2 import Posts_v2Service
+from dependencies.auth import get_current_user
+from schemas.auth import UserResponse
+
+# Set up logging
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/v1/entities/posts_v2", tags=["posts_v2"])
+
+
+# ---------- Pydantic Schemas ----------
+class Posts_v2Data(BaseModel):
+    """Entity data schema (for create/update)"""
+    content: str
+    post_type: str
+    is_anonymous: bool = None
+    review_status: str = None
+    reward_points: int = None
+    is_solved: bool = None
+    solver_id: str = None
+    likes_count: int = None
+    comments_count: int = None
+    created_at: str = None
+
+
+class Posts_v2UpdateData(BaseModel):
+    """Update entity data (partial updates allowed)"""
+    content: Optional[str] = None
+    post_type: Optional[str] = None
+    is_anonymous: Optional[bool] = None
+    review_status: Optional[str] = None
+    reward_points: Optional[int] = None
+    is_solved: Optional[bool] = None
+    solver_id: Optional[str] = None
+    likes_count: Optional[int] = None
+    comments_count: Optional[int] = None
+    created_at: Optional[str] = None
+
+
+class Posts_v2Response(BaseModel):
+    """Entity response schema"""
+    id: int
+    user_id: str
+    content: str
+    post_type: str
+    is_anonymous: Optional[bool] = None
+    review_status: Optional[str] = None
+    reward_points: Optional[int] = None
+    is_solved: Optional[bool] = None
+    solver_id: Optional[str] = None
+    likes_count: Optional[int] = None
+    comments_count: Optional[int] = None
+    created_at: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class Posts_v2ListResponse(BaseModel):
+    """List response schema"""
+    items: List[Posts_v2Response]
+    total: int
+    skip: int
+    limit: int
+
+
+class Posts_v2BatchCreateRequest(BaseModel):
+    """Batch create request"""
+    items: List[Posts_v2Data]
+
+
+class Posts_v2BatchUpdateItem(BaseModel):
+    """Batch update item"""
+    id: int
+    updates: Posts_v2UpdateData
+
+
+class Posts_v2BatchUpdateRequest(BaseModel):
+    """Batch update request"""
+    items: List[Posts_v2BatchUpdateItem]
+
+
+class Posts_v2BatchDeleteRequest(BaseModel):
+    """Batch delete request"""
+    ids: List[int]
+
+
+# ---------- Routes ----------
+@router.get("", response_model=Posts_v2ListResponse)
+async def query_posts_v2s(
+    query: str = Query(None, description="Query conditions (JSON string)"),
+    sort: str = Query(None, description="Sort field (prefix with '-' for descending)"),
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
+    fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Query posts_v2s with filtering, sorting, and pagination (user can only see their own records)"""
+    logger.debug(f"Querying posts_v2s: query={query}, sort={sort}, skip={skip}, limit={limit}, fields={fields}")
+    
+    service = Posts_v2Service(db)
+    try:
+        # Parse query JSON if provided
+        query_dict = None
+        if query:
+            try:
+                query_dict = json.loads(query)
+            except json.JSONDecodeError:
+                raise HTTPException(status_code=400, detail="Invalid query JSON format")
+        
+        result = await service.get_list(
+            skip=skip, 
+            limit=limit,
+            query_dict=query_dict,
+            sort=sort,
+            user_id=str(current_user.id),
+        )
+        logger.debug(f"Found {result['total']} posts_v2s")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error querying posts_v2s: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.get("/all", response_model=Posts_v2ListResponse)
+async def query_posts_v2s_all(
+    query: str = Query(None, description="Query conditions (JSON string)"),
+    sort: str = Query(None, description="Sort field (prefix with '-' for descending)"),
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
+    fields: str = Query(None, description="Comma-separated list of fields to return"),
+    db: AsyncSession = Depends(get_db),
+):
+    # Query posts_v2s with filtering, sorting, and pagination without user limitation
+    logger.debug(f"Querying posts_v2s: query={query}, sort={sort}, skip={skip}, limit={limit}, fields={fields}")
+
+    service = Posts_v2Service(db)
+    try:
+        # Parse query JSON if provided
+        query_dict = None
+        if query:
+            try:
+                query_dict = json.loads(query)
+            except json.JSONDecodeError:
+                raise HTTPException(status_code=400, detail="Invalid query JSON format")
+
+        result = await service.get_list(
+            skip=skip,
+            limit=limit,
+            query_dict=query_dict,
+            sort=sort
+        )
+        logger.debug(f"Found {result['total']} posts_v2s")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error querying posts_v2s: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.get("/{id}", response_model=Posts_v2Response)
+async def get_posts_v2(
+    id: int,
+    fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get a single posts_v2 by ID (user can only see their own records)"""
+    logger.debug(f"Fetching posts_v2 with id: {id}, fields={fields}")
+    
+    service = Posts_v2Service(db)
+    try:
+        result = await service.get_by_id(id, user_id=str(current_user.id))
+        if not result:
+            logger.warning(f"Posts_v2 with id {id} not found")
+            raise HTTPException(status_code=404, detail="Posts_v2 not found")
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching posts_v2 {id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.post("", response_model=Posts_v2Response, status_code=201)
+async def create_posts_v2(
+    data: Posts_v2Data,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new posts_v2"""
+    logger.debug(f"Creating new posts_v2 with data: {data}")
+    
+    service = Posts_v2Service(db)
+    try:
+        result = await service.create(data.model_dump(), user_id=str(current_user.id))
+        if not result:
+            raise HTTPException(status_code=400, detail="Failed to create posts_v2")
+        
+        logger.info(f"Posts_v2 created successfully with id: {result.id}")
+        return result
+    except ValueError as e:
+        logger.error(f"Validation error creating posts_v2: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error creating posts_v2: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.post("/batch", response_model=List[Posts_v2Response], status_code=201)
+async def create_posts_v2s_batch(
+    request: Posts_v2BatchCreateRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create multiple posts_v2s in a single request"""
+    logger.debug(f"Batch creating {len(request.items)} posts_v2s")
+    
+    service = Posts_v2Service(db)
+    results = []
+    
+    try:
+        for item_data in request.items:
+            result = await service.create(item_data.model_dump(), user_id=str(current_user.id))
+            if result:
+                results.append(result)
+        
+        logger.info(f"Batch created {len(results)} posts_v2s successfully")
+        return results
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error in batch create: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Batch create failed: {str(e)}")
+
+
+@router.put("/batch", response_model=List[Posts_v2Response])
+async def update_posts_v2s_batch(
+    request: Posts_v2BatchUpdateRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update multiple posts_v2s in a single request (requires ownership)"""
+    logger.debug(f"Batch updating {len(request.items)} posts_v2s")
+    
+    service = Posts_v2Service(db)
+    results = []
+    
+    try:
+        for item in request.items:
+            # Only include non-None values for partial updates
+            update_dict = {k: v for k, v in item.updates.model_dump().items() if v is not None}
+            result = await service.update(item.id, update_dict, user_id=str(current_user.id))
+            if result:
+                results.append(result)
+        
+        logger.info(f"Batch updated {len(results)} posts_v2s successfully")
+        return results
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error in batch update: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Batch update failed: {str(e)}")
+
+
+@router.put("/{id}", response_model=Posts_v2Response)
+async def update_posts_v2(
+    id: int,
+    data: Posts_v2UpdateData,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update an existing posts_v2 (requires ownership)"""
+    logger.debug(f"Updating posts_v2 {id} with data: {data}")
+
+    service = Posts_v2Service(db)
+    try:
+        # Only include non-None values for partial updates
+        update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
+        result = await service.update(id, update_dict, user_id=str(current_user.id))
+        if not result:
+            logger.warning(f"Posts_v2 with id {id} not found for update")
+            raise HTTPException(status_code=404, detail="Posts_v2 not found")
+        
+        logger.info(f"Posts_v2 {id} updated successfully")
+        return result
+    except HTTPException:
+        raise
+    except ValueError as e:
+        logger.error(f"Validation error updating posts_v2 {id}: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error updating posts_v2 {id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.delete("/batch")
+async def delete_posts_v2s_batch(
+    request: Posts_v2BatchDeleteRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete multiple posts_v2s by their IDs (requires ownership)"""
+    logger.debug(f"Batch deleting {len(request.ids)} posts_v2s")
+    
+    service = Posts_v2Service(db)
+    deleted_count = 0
+    
+    try:
+        for item_id in request.ids:
+            success = await service.delete(item_id, user_id=str(current_user.id))
+            if success:
+                deleted_count += 1
+        
+        logger.info(f"Batch deleted {deleted_count} posts_v2s successfully")
+        return {"message": f"Successfully deleted {deleted_count} posts_v2s", "deleted_count": deleted_count}
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error in batch delete: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Batch delete failed: {str(e)}")
+
+
+@router.delete("/{id}")
+async def delete_posts_v2(
+    id: int,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a single posts_v2 by ID (requires ownership)"""
+    logger.debug(f"Deleting posts_v2 with id: {id}")
+    
+    service = Posts_v2Service(db)
+    try:
+        success = await service.delete(id, user_id=str(current_user.id))
+        if not success:
+            logger.warning(f"Posts_v2 with id {id} not found for deletion")
+            raise HTTPException(status_code=404, detail="Posts_v2 not found")
+        
+        logger.info(f"Posts_v2 {id} deleted successfully")
+        return {"message": "Posts_v2 deleted successfully", "id": id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting posts_v2 {id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

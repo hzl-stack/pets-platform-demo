@@ -1,0 +1,46 @@
+{
+    "title": "shop_reviews",
+    "type": "object",
+    "description": "Reviews for shop applications",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "shop_id": {
+            "type": "integer",
+            "description": "Shop being reviewed"
+        },
+        "applicant_id": {
+            "type": "string",
+            "description": "Shop applicant user ID"
+        },
+        "reviewer_id": {
+            "type": "string",
+            "description": "Inspector user ID"
+        },
+        "status": {
+            "type": "string",
+            "description": "Review decision",
+            "enum": [
+                "approved",
+                "rejected"
+            ]
+        },
+        "review_comment": {
+            "type": "string",
+            "description": "Review feedback"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "Review timestamp"
+        }
+    },
+    "required": [
+        "id",
+        "shop_id",
+        "applicant_id",
+        "reviewer_id",
+        "status"
+    ]
+}

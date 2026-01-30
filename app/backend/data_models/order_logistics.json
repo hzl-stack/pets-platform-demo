@@ -1,0 +1,46 @@
+{
+    "title": "order_logistics",
+    "type": "object",
+    "description": "Order shipping and logistics information",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "order_id": {
+            "type": "integer",
+            "description": "Order ID"
+        },
+        "tracking_number": {
+            "type": "string",
+            "description": "Tracking number"
+        },
+        "carrier": {
+            "type": "string",
+            "description": "Shipping carrier"
+        },
+        "status": {
+            "type": "string",
+            "description": "Shipping status",
+            "enum": [
+                "pending",
+                "shipped",
+                "in_transit",
+                "delivered"
+            ]
+        },
+        "current_location": {
+            "type": "string",
+            "description": "Current package location"
+        },
+        "updated_at": {
+            "type": "string",
+            "description": "Last update timestamp"
+        }
+    },
+    "required": [
+        "id",
+        "order_id",
+        "status"
+    ]
+}

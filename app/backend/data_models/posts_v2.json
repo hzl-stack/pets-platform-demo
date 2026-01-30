@@ -1,0 +1,76 @@
+{
+    "title": "posts_v2",
+    "type": "object",
+    "description": "Community posts with type and review status",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "Post author user ID"
+        },
+        "content": {
+            "type": "string",
+            "description": "Post content"
+        },
+        "post_type": {
+            "type": "string",
+            "description": "Post type: daily or help",
+            "enum": [
+                "daily",
+                "help"
+            ]
+        },
+        "is_anonymous": {
+            "type": "boolean",
+            "description": "Whether post is anonymous",
+            "default": false
+        },
+        "review_status": {
+            "type": "string",
+            "description": "Review status for help posts",
+            "enum": [
+                "pending",
+                "approved",
+                "rejected"
+            ],
+            "default": "approved"
+        },
+        "reward_points": {
+            "type": "integer",
+            "description": "Points offered for solving help post",
+            "default": 0
+        },
+        "is_solved": {
+            "type": "boolean",
+            "description": "Whether help post is solved",
+            "default": false
+        },
+        "solver_id": {
+            "type": "string",
+            "description": "User ID who solved the help post"
+        },
+        "likes_count": {
+            "type": "integer",
+            "description": "Number of likes",
+            "default": 0
+        },
+        "comments_count": {
+            "type": "integer",
+            "description": "Number of comments",
+            "default": 0
+        },
+        "created_at": {
+            "type": "string",
+            "description": "Creation timestamp"
+        }
+    },
+    "required": [
+        "id",
+        "user_id",
+        "content",
+        "post_type"
+    ]
+}

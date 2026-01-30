@@ -1,0 +1,36 @@
+{
+    "title": "experience_logs",
+    "type": "object",
+    "description": "Experience and points change history",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "User ID"
+        },
+        "action_type": {
+            "type": "string",
+            "description": "Action that triggered the change"
+        },
+        "experience_change": {
+            "type": "integer",
+            "description": "Experience points change"
+        },
+        "points_change": {
+            "type": "integer",
+            "description": "Reward points change"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "Log timestamp"
+        }
+    },
+    "required": [
+        "id",
+        "user_id",
+        "action_type"
+    ]
+}
