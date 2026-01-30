@@ -1,0 +1,40 @@
+{
+    "title": "posts",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "主键，自增"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "用户ID"
+        },
+        "content": {
+            "type": "string",
+            "description": "动态内容"
+        },
+        "images": {
+            "type": "string",
+            "description": "图片URL列表，JSON字符串"
+        },
+        "is_anonymous": {
+            "type": "boolean",
+            "description": "是否匿名"
+        },
+        "likes_count": {
+            "type": "integer",
+            "description": "点赞数"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "创建时间"
+        }
+    },
+    "required": [
+        "id",
+        "user_id",
+        "content",
+        "created_at"
+    ]
+}

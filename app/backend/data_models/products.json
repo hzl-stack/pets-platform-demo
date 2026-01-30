@@ -1,0 +1,55 @@
+{
+    "title": "products",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "主键，自增"
+        },
+        "seller_id": {
+            "type": "string",
+            "description": "商家用户ID"
+        },
+        "name": {
+            "type": "string",
+            "description": "商品名称"
+        },
+        "description": {
+            "type": "string",
+            "description": "商品描述"
+        },
+        "price": {
+            "type": "number",
+            "description": "价格"
+        },
+        "category": {
+            "type": "string",
+            "description": "分类：食品/玩具/用品/医疗"
+        },
+        "image_url": {
+            "type": "string",
+            "description": "商品图片URL"
+        },
+        "stock": {
+            "type": "integer",
+            "description": "库存数量"
+        },
+        "status": {
+            "type": "string",
+            "description": "状态：active/inactive"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "创建时间"
+        }
+    },
+    "required": [
+        "id",
+        "seller_id",
+        "name",
+        "price",
+        "category",
+        "status",
+        "created_at"
+    ]
+}

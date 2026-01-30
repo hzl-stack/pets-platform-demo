@@ -1,0 +1,34 @@
+[
+    {
+        "user_id": "user_001",
+        "content": "我家的小金毛今天学会了握手！太聪明了🐕",
+        "images": "[]",
+        "is_anonymous": false,
+        "likes_count": 15,
+        "created_at": "2026-01-29 10:30:00"
+    },
+    {
+        "user_id": "user_002",
+        "content": "求助：猫咪最近不爱吃饭，有什么好办法吗？",
+        "images": "[]",
+        "is_anonymous": true,
+        "likes_count": 8,
+        "created_at": "2026-01-29 14:20:00"
+    },
+    {
+        "user_id": "user_003",
+        "content": "分享一下我家布偶猫的日常，颜值爆表！😻",
+        "images": "[]",
+        "is_anonymous": false,
+        "likes_count": 32,
+        "created_at": "2026-01-30 09:15:00"
+    },
+    {
+        "user_id": "user_001",
+        "content": "今天带狗狗去公园玩，遇到了好多小伙伴",
+        "images": "[]",
+        "is_anonymous": false,
+        "likes_count": 12,
+        "created_at": "2026-01-30 16:45:00"
+    }
+]

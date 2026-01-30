@@ -1,0 +1,33 @@
+{
+    "title": "comments",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "主键，自增"
+        },
+        "post_id": {
+            "type": "integer",
+            "description": "动态ID"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "用户ID"
+        },
+        "content": {
+            "type": "string",
+            "description": "评论内容"
+        },
+        "created_at": {
+            "type": "string",
+            "description": "创建时间"
+        }
+    },
+    "required": [
+        "id",
+        "post_id",
+        "user_id",
+        "content",
+        "created_at"
+    ]
+}
